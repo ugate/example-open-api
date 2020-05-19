@@ -1,0 +1,25 @@
+{
+  "name": "example-open-api",
+  "version": "1.0.0",
+  "description": "OpenAPI/Swagger example using express",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ugate/example-open-api.git"
+  },
+  "author": "ugate",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ugate/example-open-api/issues"
+  },
+  "homepage": "https://github.com/ugate/example-open-api#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-validation": "^3.0.5",
+    "swagger-jsdoc": "^4.0.0",
+    "swagger-ui-express": "^4.1.4"
+  }
+}
