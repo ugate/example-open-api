@@ -2,38 +2,54 @@
 
 const Fs = require('fs');
 const Path = require('path');
+const { promisify } = require('util');
+
 const express = require('express');
-const sdoc = require("swagger-jsdoc");
+const app = express();
+const { ValidationError } = require('express-validation');
+const sjsdocx = require("swagger-jsdoc");
 const sui = require("swagger-ui-express");
 
-const app = express();
+const YAML = require('yamljs');
+const sdoc = YAML.load('./resources/openapi.yml');
+
+const host = process.env.NODE_HOST || 'localhost';
 const port = process.env.NODE_PORT || 5050;
-const serverPath = `http://localhost:${port}`;
+const serverSpec = {
+  url: `http://${host}:${port}`,
+  description: 'Default server'
+};
 const routesPath = './routes';
 const apiPath = `${routesPath}/api`;
 const apiDocsRoute = '/api-docs';
 
+// add the server
+if (sdoc.servers) sdoc.servers.unshift(serverSpec);
+else sdoc.servers = [serverSpec];
+
+//const bodyParser = require('body-parser');
+//app.use(bodyParser.json());
+
 // --------------------- OpenAPI Docs ---------------------
 
-// see: https://swagger.io/specification/#infoObject
-const sdef = sdoc({
-  swaggerDefinition: {
-    info: {
-      title: "Users API",
-      description: "Users microservice API",
-      contact: {
-        name: "Someone"
-      },
-      servers: [serverPath]
-    }
-  },
+const sjsdoc = sjsdocx({
+  swaggerDefinition: sdoc,
   apis: [`${apiPath}/*.js`]
 });
 
 // serve REST docs
-app.use(apiDocsRoute, sui.serve, sui.setup(sdef));
+app.use(apiDocsRoute, sui.serve, sui.setup(sjsdoc, { explorer: true }));
 
-// --------------------- OpenAPI ---------------------
+// --------------------- Validation ---------------------
+
+// app.use(function(err, req, res, next) {
+//   if (err instanceof ValidationError) {
+//     return res.status(err.statusCode).json(err);
+//   }
+//   return res.status(500).json(err);
+// });
+
+// --------------------- Application ---------------------
 
 (async () => {
   // map all routes in /routes (and sub-dirs)
@@ -43,10 +59,12 @@ app.use(apiDocsRoute, sui.serve, sui.setup(sdef));
   }
 
   // startup
-  app.listen(port, () => {
-    console.log(`Microservice: ${serverPath} REST API Docs: ${serverPath}${apiDocsRoute}`);
-  });
+  await promisify(app.listen).bind(app)(port);
+
+  console.log(`Microservice: ${serverSpec.url} REST API Docs: ${serverSpec.url}${apiDocsRoute}`);
 })();
+
+// --------------------- Utilities ---------------------
 
 /**
  * Generates a set of file paths by recursively traversing the given directory
