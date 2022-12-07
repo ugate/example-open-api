@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/ugate/example-open-api#readme",
   "dependencies": {
-    "express": "^4.17.1",
+    "express": "^4.18.2",
     "express-validation": "^3.0.5",
     "swagger-jsdoc": "^4.0.0",
     "swagger-ui-express": "^4.1.4",
